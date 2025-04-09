@@ -1,0 +1,35 @@
+package com.example.CinemaTicketAutomation.entity.enums;
+
+public enum Genre {
+    ACTION,
+    COMEDY,
+    DRAMA,
+    HORROR,
+    ROMANCE,
+    SCI_FI,
+    THRILLER,
+    FANTASY,
+    DOCUMENTARY,
+    ANIMATION,
+    ADVENTURE,
+    MYSTERY,
+    CRIME,
+    HISTORICAL,
+    WAR,
+    WESTERN,
+    MUSIC,
+    FAMILY,
+    BIOGRAPHY,
+    SPORTS,
+    MUSICAL,
+    SUSPENSE,
+    SUPERHERO,
+    COMING_OF_AGE,
+    ART_HOUSE,
+    SLAPSTICK,
+    PARODY,
+    GOTHIC,
+    EXPERIMENTAL,
+    POLITICAL
+}
+
