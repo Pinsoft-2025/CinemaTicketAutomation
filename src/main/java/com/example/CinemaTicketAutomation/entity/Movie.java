@@ -28,14 +28,14 @@ public class Movie {
     @Column(name = "description")
     private String description;
 
-    @Column(name = "poster")
-    private String poster;
+    @Column(name = "poster", columnDefinition = "TEXT")
+    private String poster; //base64Image
 
     @Column(name = "trailer_uri")
     private String trailerURI;
 
     @Column(name = "duration_min")
-    private int durationMin;
+    private float durationMin; //hour is calculated
 
     @ElementCollection
     @CollectionTable(name = "movie_genres", joinColumns = @JoinColumn(name = "movie_id"))
