@@ -19,25 +19,25 @@ import java.util.List;
 public class Reservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
+    @Column(name = "id", nullable = false)
     private long id;
 
     @Column(name = "reservation_time", nullable = false)
-    private LocalDateTime reservationTime;
+    private LocalDateTime reservationTime = LocalDateTime.now();
 
-    @Column(name = "total_price")
+    @Column(name = "total_price", nullable = false, precision = 10, scale = 2)
     private BigDecimal totalPrice;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_status")
-    private PaymentStatus paymentStatus;
+    private PaymentStatus paymentStatus = PaymentStatus.PENDING;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_method")
     private PaymentMethod paymentMethod;
 
     @ManyToOne
-    @JoinColumn(name = "user_id")
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @OneToMany(mappedBy = "reservation")

@@ -19,13 +19,13 @@ import java.util.List;
 public class Movie {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
+    @Column(name = "id", nullable = false)
     private long id;
 
     @Column(name = "title", nullable = false)
     private String title;
 
-    @Column(name = "description")
+    @Column(name = "description", length = 500)
     private String description;
 
     @Column(name = "poster")
@@ -34,7 +34,7 @@ public class Movie {
     @Column(name = "trailer_uri")
     private String trailerURI;
 
-    @Column(name = "duration_min")
+    @Column(name = "duration_min", nullable = false)
     private int durationMin;
 
     @ElementCollection
@@ -50,7 +50,7 @@ public class Movie {
     @Column(name = "country")
     private Country country;
 
-    @Column(name = "release_date")
+    @Column(name = "release_date", nullable = false)
     private LocalDate releaseDate;
 
     @ElementCollection

@@ -16,7 +16,7 @@ public class Seat {
     @Column(name = "id")
     private long id;
 
-    @Column(name = "seat_no", nullable = false)
+    @Column(name = "seat_no") // column + row
     private int seatNo;
 
     @Column(name = "row", nullable = false)
@@ -26,7 +26,7 @@ public class Seat {
     private int column;
 
     @ManyToOne
-    @JoinColumn(name = "hall_id")
+    @JoinColumn(name = "hall_id", nullable = false)
     private Hall hall;
 }
 

@@ -14,12 +14,12 @@ import lombok.NoArgsConstructor;
 public class SeansSeat {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
+    @Column(name = "id", nullable = false)
     private long id;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "status", nullable = false)
-    private SeatStatus status;
+    private SeatStatus status = SeatStatus.FREE;
 
     @ManyToOne
     @JoinColumn(name = "seans_id")

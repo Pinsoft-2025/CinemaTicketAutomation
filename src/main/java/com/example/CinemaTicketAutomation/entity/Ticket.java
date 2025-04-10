@@ -17,27 +17,27 @@ import java.time.LocalDateTime;
 public class Ticket {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id")
+    @Column(name = "id", nullable = false)
     private long id;
 
     @Enumerated(EnumType.STRING)
     @Column(name = "type", nullable = false)
-    private TicketType type;
+    private TicketType type = TicketType.FULL;
 
-    @Column(name = "price", nullable = false)
+    @Column(name = "price", nullable = false, precision = 10, scale = 2)
     private BigDecimal price;
 
     @Column(name = "barcode", unique = true, nullable = false)
     private String barcode;
 
     @Column(name = "issued_at", nullable = false)
-    private LocalDateTime issuedAt;
+    private LocalDateTime issuedAt = LocalDateTime.now();
 
     @ManyToOne
     @JoinColumn(name = "reservation_id")
     private Reservation reservation;
 
     @OneToOne
-    @JoinColumn(name = "seans_seat_id")
+    @JoinColumn(name = "seans_seat_id", nullable = false)
     private SeansSeat seansSeat;
 }
