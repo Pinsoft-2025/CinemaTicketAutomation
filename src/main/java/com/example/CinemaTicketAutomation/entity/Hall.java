@@ -21,14 +21,34 @@ public class Hall {
     @Column(name = "hall_no", nullable = false, unique = true)
     private String hallNo; // 1, 2 de olur ama özel bir isim konmak istenirse konur
 
-    @Column(name = "capacity", nullable = false)
-    private int capacity;
+    // Seat düzenini belirleyen alanlar
+    @Column(name = "max_row", nullable = false) // Örn: "F" (A'dan F'ye kadar satır olduğunu belirtir)
+    private String maxRow;
 
-    @OneToMany(mappedBy = "hall")
+    @Column(name = "max_col", nullable = false) // Örn: 10 (1'den 10'a kadar sütun olduğunu belirtir)
+    private int maxCol;
+
+    // Kapasite kaldırıldı, getCapacity() metodu ile hesaplanacak.
+
+    //eğer hall silinirse içindeki tüm seat nesneleride tamamen silinir
+    @OneToMany(mappedBy = "hall", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<Seat> seats;
 
-    @OneToMany(mappedBy = "hall")
+    @OneToMany(mappedBy = "hall", fetch = FetchType.LAZY)
     private List<Seans> seanses;
+
+    public int getCapacity() {
+        return this.seats == null ? 0 : this.seats.size();
+    }
+
+    public int getTheoreticalMaxCapacity() {
+        if (maxRow == null || maxRow.isEmpty() || maxCol <= 0) {
+            return 0;
+        }
+        // Basitçe A=1, B=2... varsayımıyla
+        int rowCount = maxRow.toUpperCase().charAt(0) - 'A' + 1;
+        return rowCount * maxCol;
+    }
 }
 /*
 *********************** sadece not almak için yazdım ***********************

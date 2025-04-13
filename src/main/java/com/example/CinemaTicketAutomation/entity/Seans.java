@@ -52,13 +52,14 @@ public class Seans {
     @ManyToOne
     @JoinColumn(name = "hall_id", nullable = false)
     private Hall hall;
-}
 
-//@PrePersist
-//@PreUpdate
-//private void calculateEndTime() {
-//    if (movie != null && breakTime != null && startTime != null) {
-//        int totalMinutes = movie.getDurationMin() + breakTime.getHour() * 60 + breakTime.getMinute();
-//        this.endTime = startTime.plusMinutes(totalMinutes);
-//    }
-//}
+
+    @PrePersist
+    @PreUpdate
+    private void calculateEndTime() {
+        if (movie != null && breakTime != null && startTime != null) {
+            int totalMinutes = movie.getDurationMin() + breakTime.getHour() * 60 + breakTime.getMinute();
+            this.endTime = startTime.plusMinutes(totalMinutes);
+        }
+    }
+}

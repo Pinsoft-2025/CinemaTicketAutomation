@@ -8,7 +8,8 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "seats")
+@Table(name = "seats", uniqueConstraints = {@UniqueConstraint(columnNames = {"hall_id", "row", "column"})
+})
 @Entity
 public class Seat {
     @Id
@@ -16,17 +17,17 @@ public class Seat {
     @Column(name = "id")
     private long id;
 
-    @Column(name = "seat_no") // column + row
-    private int seatNo;
+    @Column(name = "seat_no", nullable = false, length = 10) // column + row
+    private String seatNo;
 
-    @Column(name = "row", nullable = false)
+    @Column(name = "row", nullable = false, length = 2)
     private String row;
 
     @Column(name = "column", nullable = false)
     private int column;
 
     @ManyToOne
-    @JoinColumn(name = "hall_id", nullable = false)
+    @JoinColumn(name = "hall_id", nullable = false, updatable = false)
     private Hall hall;
 }
 
