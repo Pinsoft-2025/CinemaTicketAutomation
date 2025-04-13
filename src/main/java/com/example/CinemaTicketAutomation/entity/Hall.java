@@ -35,7 +35,7 @@ public class Hall {
     private List<Seat> seats;
 
     @OneToMany(mappedBy = "hall", fetch = FetchType.LAZY)
-    private List<Seans> seanses;
+    private List<Seance> seances;
 
     public int getCapacity() {
         return this.seats == null ? 0 : this.seats.size();

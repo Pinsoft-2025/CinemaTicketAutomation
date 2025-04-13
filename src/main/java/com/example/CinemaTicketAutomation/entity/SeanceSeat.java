@@ -7,11 +7,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "seans_seats")
+@Table(name = "seance_seats")
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class SeansSeat {
+public class SeanceSeat {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
@@ -22,8 +22,8 @@ public class SeansSeat {
     private SeatStatus status = SeatStatus.FREE;
 
     @ManyToOne
-    @JoinColumn(name = "seans_id")
-    private Seans seans;
+    @JoinColumn(name = "seance_id")
+    private Seance seance;
 
     @ManyToOne
     @JoinColumn(name = "seat_id")

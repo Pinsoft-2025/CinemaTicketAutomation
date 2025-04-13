@@ -60,5 +60,5 @@ public class Movie {
     private List<Warning> warnings;
 
     @OneToMany(mappedBy = "movie")
-    private List<Seans> seanses;
+    private List<Seance> seances;
 }

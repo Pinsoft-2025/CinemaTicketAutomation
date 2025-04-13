@@ -39,5 +39,5 @@ public class Ticket {
 
     @OneToOne
     @JoinColumn(name = "seans_seat_id", nullable = false)
-    private SeansSeat seansSeat;
+    private SeanceSeat seanceSeat;
 }

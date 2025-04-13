@@ -12,9 +12,9 @@ import java.time.LocalTime;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Table(name = "seanses")
+@Table(name = "seances")
 @Entity
-public class Seans {
+public class Seance {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
