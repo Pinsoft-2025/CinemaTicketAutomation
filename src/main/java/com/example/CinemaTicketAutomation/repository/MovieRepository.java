@@ -13,12 +13,10 @@ import java.util.List;
 @Repository
 public interface MovieRepository extends JpaRepository<Movie, Long> {
     List<Movie> findByGenresContaining(Genre genre);
-    List<Movie> findByGenresContaining(Genre genre, Pageable pageable);
     List<Movie> findByDirector(String director);
     List<Movie> findByCountry(Country country);
-    List<Movie> findByTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCase(String title, String description);
-    List<Movie> findByTitleContainingIgnoreCaseOrDescriptionContainingIgnoreCase(String title, String description, Pageable pageable);
     List<Movie> findByReleaseDateBetween(LocalDate startDate, LocalDate endDate, Pageable pageable);
     List<Movie> findByReleaseDateAfter(LocalDate date);
     List<Movie> findByReleaseDate(LocalDate date);
+    List<Movie> findByTitleContainingIgnoreCase(String keyword);
 }

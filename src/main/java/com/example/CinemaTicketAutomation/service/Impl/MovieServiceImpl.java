@@ -3,6 +3,7 @@ package com.example.CinemaTicketAutomation.service.Impl;
 import com.example.CinemaTicketAutomation.dto.request.MovieCreateDto;
 import com.example.CinemaTicketAutomation.dto.response.MovieDto;
 import com.example.CinemaTicketAutomation.entity.Movie;
+import com.example.CinemaTicketAutomation.entity.enums.Country;
 import com.example.CinemaTicketAutomation.entity.enums.Genre;
 import com.example.CinemaTicketAutomation.repository.MovieRepository;
 import com.example.CinemaTicketAutomation.service.MovieService;
@@ -87,6 +88,7 @@ public class MovieServiceImpl implements MovieService {
         return toDto(movie);
     }
 
+    //for other services
     @Override
     public Movie getMovieEntity(Long movieId) {
         return movieRepository.findById(movieId)
@@ -118,6 +120,34 @@ public class MovieServiceImpl implements MovieService {
     @Override
     public List<MovieDto> getMoviesByReleaseDate(LocalDate releaseDate) {
         return movieRepository.findByReleaseDate(releaseDate).stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<MovieDto> searchMoviesByTitle(String keyword) {
+        return movieRepository.findByTitleContainingIgnoreCase(keyword).stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<MovieDto> getMoviesByDirector(String director) {
+        return movieRepository.findByDirector(director).stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<MovieDto> getMoviesByCountry(Country country) {
+        return movieRepository.findByCountry(country).stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<MovieDto> getMoviesByDateRange(LocalDate startDate, LocalDate endDate) {
+        return movieRepository.findByReleaseDateBetween(startDate, endDate, null).stream()
                 .map(this::toDto)
                 .collect(Collectors.toList());
     }

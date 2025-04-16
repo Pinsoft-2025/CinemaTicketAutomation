@@ -3,6 +3,7 @@ package com.example.CinemaTicketAutomation.service;
 import com.example.CinemaTicketAutomation.dto.request.MovieCreateDto;
 import com.example.CinemaTicketAutomation.dto.response.MovieDto;
 import com.example.CinemaTicketAutomation.entity.Movie;
+import com.example.CinemaTicketAutomation.entity.enums.Country;
 import com.example.CinemaTicketAutomation.entity.enums.Genre;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -22,5 +23,9 @@ public interface MovieService {
     List<MovieDto> getMoviesByGenre(Genre genre);
     List<MovieDto> getUpcomingMovies();
     List<MovieDto> getMoviesByReleaseDate(LocalDate releaseDate);
+    List<MovieDto> searchMoviesByTitle(String keyword);
+    List<MovieDto> getMoviesByDirector(String director);
+    List<MovieDto> getMoviesByCountry(Country country);
+    List<MovieDto> getMoviesByDateRange(LocalDate startDate, LocalDate endDate);
     long getMovieCount();
 }

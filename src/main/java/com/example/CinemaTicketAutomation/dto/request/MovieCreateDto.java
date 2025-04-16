@@ -9,15 +9,15 @@ import java.time.LocalDate;
 import java.util.List;
 
 public record MovieCreateDto(
-    String title,
-    String description,
-    String posterBase64,
-    MultipartFile posterFile,
-    String trailerURI,
-    int durationMin,
-    List<Genre> genres,
-    String director,
-    Country country,
-    LocalDate releaseDate,
-    List<Warning> warnings
+        String title,
+        String description,
+        String posterBase64,
+        MultipartFile posterFile,
+        String trailerURI,
+        int durationMin,
+        List<Genre> genres,
+        String director,
+        Country country,
+        LocalDate releaseDate,
+        List<Warning> warnings
 ) {} 
