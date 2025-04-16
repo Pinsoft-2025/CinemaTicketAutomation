@@ -4,7 +4,6 @@ import com.example.CinemaTicketAutomation.dto.request.TicketCreateDto;
 import com.example.CinemaTicketAutomation.dto.response.SeanceSeatDto;
 import com.example.CinemaTicketAutomation.dto.response.TicketDto;
 import com.example.CinemaTicketAutomation.entity.*;
-import com.example.CinemaTicketAutomation.entity.enums.CancellationStatus;
 import com.example.CinemaTicketAutomation.entity.enums.SeatStatus;
 import com.example.CinemaTicketAutomation.entity.enums.TicketType;
 import com.example.CinemaTicketAutomation.repository.TicketRepository;
@@ -134,24 +133,12 @@ public class TicketServiceImpl implements TicketService {
                 .collect(Collectors.toList());
     }
 
-    @Override
-    public List<TicketDto> getTicketsByCancellationStatus(CancellationStatus status) {
-        return ticketRepository.findByCancellationStatus(status).stream()
-                .map(this::toDto)
-                .collect(Collectors.toList());
-    }
+
 
     @Override
     public TicketDto getTicketByBarcode(String barcode) {
         Ticket ticket = ticketRepository.findByBarcode(barcode);
         return toDto(ticket);
-    }
-
-    @Override
-    public List<TicketDto> getTicketsByBarcodeAndCancellationStatus(String barcode, CancellationStatus status) {
-        return ticketRepository.findByBarcodeAndCancellationStatus(barcode, status).stream()
-                .map(this::toDto)
-                .collect(Collectors.toList());
     }
 
     // Entity <-> DTO dönüşüm metodu
