@@ -1,5 +1,6 @@
 package com.example.CinemaTicketAutomation.service.Impl;
 
+import com.example.CinemaTicketAutomation.dto.response.HallDto;
 import com.example.CinemaTicketAutomation.entity.Hall;
 import com.example.CinemaTicketAutomation.entity.Seat;
 import com.example.CinemaTicketAutomation.repository.HallRepository;
@@ -18,6 +19,7 @@ public class HallServiceImpl implements HallService {
 
     private final HallRepository hallRepository;
 
+    //no sensitive info, no need for dto
     @Override
     public Hall createHall(Hall hall) {
         return hallRepository.save(hall);
@@ -96,5 +98,28 @@ public class HallServiceImpl implements HallService {
     @Override
     public List<Hall> getHallsWithMinimumCapacity(int minCapacity) {
         return hallRepository.findHallsWithMinimumCapacity(minCapacity);
+    }
+
+    @Override
+    public HallDto getHallDto(long hallId) {
+        Hall hall = getHall(hallId);
+        return toDto(hall);
+    }
+
+    @Override
+    public List<HallDto> getAllHallDtos() {
+        return getAllHalls().stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+    }
+
+    private HallDto toDto(Hall hall) {
+        if (hall == null) return null;
+        return new HallDto(
+            hall.getId(),
+            hall.getHallNo(),
+            hall.getMaxRow(),
+            hall.getMaxCol()
+        );
     }
 }
