@@ -1,7 +1,9 @@
 package com.example.CinemaTicketAutomation.entity;
 
+import com.example.CinemaTicketAutomation.entity.enums.Role;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -10,9 +12,10 @@ import java.util.List;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
+@Builder
 @Table(name = "users")
 @Entity
-public class User {
+public class AppUser {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
@@ -31,14 +34,19 @@ public class User {
     private String phoneNumber;
 
     @Column(name = "firstname")
-    private String firstname;
+    private String firstname = "John";
 
-    @Column(name = "surname")
-    private String surname;
+    @Column(name = "lastname")
+    private String lastName = "Doe";
 
     @Column(name = "age")
     private int age;
 
-    @OneToMany(mappedBy = "user")
+    @Column(name = "role", nullable = false)
+    @Enumerated(EnumType.STRING)
+    private Role role = Role.ROLE_USER;
+
+
+    @OneToMany(mappedBy = "appUser")
     private List<Reservation> reservations;
 }
