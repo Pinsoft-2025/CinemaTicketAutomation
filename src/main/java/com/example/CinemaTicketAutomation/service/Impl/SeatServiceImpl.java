@@ -1,5 +1,6 @@
 package com.example.CinemaTicketAutomation.service.Impl;
 
+import com.example.CinemaTicketAutomation.dto.response.SeatDto;
 import com.example.CinemaTicketAutomation.entity.Hall;
 import com.example.CinemaTicketAutomation.entity.Seat;
 import com.example.CinemaTicketAutomation.repository.HallRepository;
@@ -13,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.naming.NoPermissionException;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
 @Service
@@ -40,65 +42,76 @@ public class SeatServiceImpl implements SeatService {
         Hall hall = hallRepository.findById(hallId)
                 .orElseThrow(() -> new EntityNotFoundException("Hall not found with id: " + hallId));
 
-        String maxRow = hall.getMaxRow().toUpperCase();
-        int maxCol = hall.getMaxCol();
-
-        // Get all existing seats for this hall
         List<Seat> existingSeats = seatRepository.findByHallId(hallId);
-
-        // If no seats exist, create the first one (A1)
         if (existingSeats.isEmpty()) {
             return createSeat(hall, "A", 1);
         }
 
-        // Create a grid to track which positions are filled
-        boolean[][] grid = new boolean[26][maxCol + 1]; // 26 letters in alphabet
+        SeatPosition nextPosition = findNextAvailablePosition(hall, existingSeats);
 
-        // Mark existing seats in the grid
+        return createSeat(hall, nextPosition.row(), nextPosition.column());
+    }
+
+    // Bir sonraki müsait koltuk pozisyonunu bulan yardımcı record
+    private record SeatPosition(String row, int column) {}
+
+    // sonraki boş pozisyonu bulan yardımcı metod
+    private SeatPosition findNextAvailablePosition(Hall hall, List<Seat> existingSeats) {
+        String maxRow = hall.getMaxRow().toUpperCase();
+        int maxCol = hall.getMaxCol();
+        
+        // Maksimum satır sayısını hesapla (örn: 'F' için 6)
+        int maxRowCount = maxRow.charAt(0) - 'A' + 1;
+        
+        // Grid oluştur ve mevcut koltukları işaretle
+        boolean[][] grid = createAndFillGrid(existingSeats, maxRowCount, maxCol);
+
+        // İlk boş pozisyonu bul
+        for (int r = 0; r < maxRowCount; r++) {
+            char rowChar = (char) ('A' + r);
+            String rowStr = String.valueOf(rowChar);
+
+            for (int c = 1; c <= maxCol; c++) {
+                if (!grid[r][c]) {
+                    return new SeatPosition(rowStr, c);
+                }
+            }
+        }
+
+        throw new RuntimeException("Salon " + hall.getId() + " dolu. Daha fazla koltuk eklenemez.");
+    }
+
+    // Grid oluşturup dolduran yardımcı metod
+    private boolean[][] createAndFillGrid(List<Seat> existingSeats, int maxRowCount, int maxCol) {
+        boolean[][] grid = new boolean[maxRowCount][maxCol + 1];
+
         for (Seat seat : existingSeats) {
             char rowChar = seat.getRow().toUpperCase().charAt(0);
             int rowIndex = rowChar - 'A';
             int colIndex = seat.getColumn();
 
-            if (rowIndex >= 0 && rowIndex < 26 && colIndex >= 1 && colIndex <= maxCol) {
+            if (rowIndex >= 0 && rowIndex < maxRowCount && colIndex >= 1 && colIndex <= maxCol) {
                 grid[rowIndex][colIndex] = true;
             }
         }
 
-        // Find the first available gap
-        for (int r = 0; r < 26; r++) {
-            char rowChar = (char) ('A' + r);
-            String rowStr = String.valueOf(rowChar);
-
-            // Don't go beyond the max row
-            if (rowChar > maxRow.charAt(0)) {
-                throw new RuntimeException("Hall with id " + hallId + " is full. Cannot add more seats.");
-            }
-
-            for (int c = 1; c <= maxCol; c++) {
-                if (!grid[r][c]) {
-                    // Found a gap, create a seat here
-                    return createSeat(hall, rowStr, c);
-                }
-            }
-        }
-
-        // If we get here, all possible positions are filled
-        throw new RuntimeException("Hall with id " + hallId + " is full. Cannot add more seats.");
+        return grid;
     }
 
-    // Helper method to create a new seat
+    // Yeni koltuk oluşturan yardımcı metod
     private Seat createSeat(Hall hall, String row, int column) {
+        // Önce bu konumda koltuk var mı kontrol et
+        if (seatRepository.existsByHallIdAndRowAndColumn(hall.getId(), row, column)) {
+            throw new IllegalStateException(
+                row + column + " konumunda zaten bir koltuk var (Salon: " + hall.getId() + ")");
+        }
+
+        // Yeni koltuğu oluştur
         Seat newSeat = new Seat();
         newSeat.setHall(hall);
         newSeat.setRow(row);
         newSeat.setColumn(column);
         newSeat.setSeatNo(row + column);
-
-        // Double-check to ensure this seat doesn't already exist
-        if (seatRepository.existsByHallIdAndRowAndColumn(hall.getId(), row, column)) {
-            throw new IllegalStateException("Seat " + newSeat.getSeatNo() + " already exists in hall " + hall.getId());
-        }
 
         return seatRepository.save(newSeat);
     }
@@ -141,4 +154,26 @@ public class SeatServiceImpl implements SeatService {
         return seatRepository.findByHallId(hallId);
     }
 
+    @Override
+    public SeatDto getSeatDto(long seatId) {
+        return toDto(getSeat(seatId));
+    }
+
+    @Override
+    public List<SeatDto> getAllSeatDtosByHallId(long hallId) {
+        return getAllSeatsByHallId(hallId).stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+    }
+
+    private SeatDto toDto(Seat seat) {
+        if (seat == null) return null;
+        
+        return SeatDto.builder()
+                .seatNo(seat.getSeatNo())
+                .row(seat.getRow())
+                .column(seat.getColumn())
+                .hallId(seat.getHall().getId())
+                .build();
+    }
 }

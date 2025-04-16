@@ -1,12 +1,16 @@
 package com.example.CinemaTicketAutomation.service.Impl;
 
+import com.example.CinemaTicketAutomation.dto.request.SeanceCreateDto;
+import com.example.CinemaTicketAutomation.dto.request.SeanceSearchDto;
+import com.example.CinemaTicketAutomation.dto.request.TimeSlotCheckDto;
+import com.example.CinemaTicketAutomation.dto.response.SeanceDto;
 import com.example.CinemaTicketAutomation.entity.Hall;
 import com.example.CinemaTicketAutomation.entity.Movie;
 import com.example.CinemaTicketAutomation.entity.Seance;
 import com.example.CinemaTicketAutomation.entity.enums.MovieFormat;
-import com.example.CinemaTicketAutomation.repository.HallRepository;
-import com.example.CinemaTicketAutomation.repository.MovieRepository;
 import com.example.CinemaTicketAutomation.repository.SeanceRepository;
+import com.example.CinemaTicketAutomation.service.MovieService;
+import com.example.CinemaTicketAutomation.service.HallService;
 import com.example.CinemaTicketAutomation.service.SeanceService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +20,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-
+import java.util.stream.Collectors;
 
 /*
 tricky part about halls is you should make sure these 3 work perfectly for any method:
@@ -31,135 +35,150 @@ also since only start and break times are known you gotta calculate "end time" a
 public class SeanceServiceImpl implements SeanceService {
 
     private final SeanceRepository seanceRepository;
-    private final MovieRepository movieRepository;
-    private final HallRepository hallRepository;
+    private final MovieService movieService;
+    private final HallService hallService;
 
     @Transactional
     @Override
-    public Seance createSeance(Seance seance) {
-        Movie movie = movieRepository.findById(seance.getMovie().getId())
-                .orElseThrow(() -> new EntityNotFoundException("Movie not found with id: " + seance.getMovie().getId()));
+    public SeanceDto createSeance(SeanceCreateDto createDto) {
+        Movie movie = movieService.getMovieEntity(createDto.movieId());
+        Hall hall = hallService.getHall(createDto.hallId());
 
-        Hall hall = hallRepository.findById(seance.getHall().getId())
-                .orElseThrow(() -> new EntityNotFoundException("Hall not found with id: " + seance.getHall().getId()));
+        Seance seance = new Seance();
+        updateSeanceFromDto(seance, createDto, movie, hall);
 
-        calculateEndTime(seance, movie);
-
-         if (!isHallAvailableForTimeSlot(hall.getId(), seance.getDate(), seance.getStartTime(), seance.getEndTime())) {
-            throw new IllegalStateException("Hall " + hall.getId() + " is not available for the specified time slot");
+        if (!isHallAvailable(new TimeSlotCheckDto(
+                hall.getId(), seance.getDate(), seance.getStartTime(), seance.getEndTime()))) {
+            throw new IllegalStateException("Salon " + hall.getId() + " bu zaman dilimi için müsait değil");
         }
 
-        seance.setMovie(movie);
-        seance.setHall(hall);
-
-        return seanceRepository.save(seance);
+        return toDto(seanceRepository.save(seance));
     }
 
     @Transactional
     @Override
-    public Seance updateSeance(Seance seance) {
-        Seance existingSeance = seanceRepository.findById(seance.getId())
-                .orElseThrow(() -> new EntityNotFoundException("Session not found with id: " + seance.getId()));
-
-        Movie movie = movieRepository.findById(seance.getMovie().getId())
-                .orElseThrow(() -> new EntityNotFoundException("Movie not found with id: " + seance.getMovie().getId()));
-
-        Hall hall = hallRepository.findById(seance.getHall().getId())
-                .orElseThrow(() -> new EntityNotFoundException("Hall not found with id: " + seance.getHall().getId()));
-
-         calculateEndTime(seance, movie);
-
-        // Check if the hall is available for this time slot (excluding this session)
-        boolean hallAvailable = true;
-
-        if (existingSeance.getHall().getId() != seance.getHall().getId() ||
-                !existingSeance.getDate().equals(seance.getDate()) ||
-                !existingSeance.getStartTime().equals(seance.getStartTime()) ||
-                !existingSeance.getEndTime().equals(seance.getEndTime())) {
-
-            hallAvailable = isHallAvailableForTimeSlot(hall.getId(), seance.getDate(), seance.getStartTime(), seance.getEndTime());
-        }
-
-        if (!hallAvailable) {
-            throw new IllegalStateException("Hall " + hall.getId() + " is not available for the specified time slot");
-        }
-
-        existingSeance.setStartTime(seance.getStartTime());
-        existingSeance.setBreakTime(seance.getBreakTime());
-        existingSeance.setEndTime(seance.getEndTime());
-        existingSeance.setDate(seance.getDate());
-        existingSeance.setDubLanguage(seance.getDubLanguage());
-        existingSeance.setHasSubtitle(seance.isHasSubtitle());
-        existingSeance.setSubLanguage(seance.getSubLanguage());
-        existingSeance.setFormat(seance.getFormat());
-        existingSeance.setMovie(movie);
-        existingSeance.setHall(hall);
-
-        return seanceRepository.save(existingSeance);
+    public SeanceDto updateSeance(Long seanceId, SeanceCreateDto updateDto) {
+        // 1. Var olan seansı bul
+        Seance existingSeance = findSeanceById(seanceId);
+        
+        // 2. Gerekli entity'leri al
+        Movie movie = movieService.getMovieEntity(updateDto.movieId());
+        Hall hall = hallService.getHall(updateDto.hallId());
+        
+        // 3. Seansı güncelle
+        updateSeanceFromDto(existingSeance, updateDto, movie, hall);
+        
+        // 4. Salon müsait mi kontrol et
+        validateHallAvailability(existingSeance, updateDto);
+        
+        // 5. Kaydet ve dönüştür
+        return toDto(seanceRepository.save(existingSeance));
     }
 
     @Override
     public void deleteSeance(long seanceId) {
         if (!seanceRepository.existsById(seanceId)) {
-            throw new EntityNotFoundException("Session not found with id: " + seanceId);
+            throw new EntityNotFoundException("Seans bulunamadı: " + seanceId);
         }
-
         seanceRepository.deleteById(seanceId);
     }
 
     @Override
-    public Seance getSeance(long seanceId) {
+    public SeanceDto getSeance(long seanceId) {
+        return toDto(findSeanceById(seanceId));
+    }
+
+    @Override
+    public List<SeanceDto> getAllSeance() {
+        return seanceRepository.findAll().stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<SeanceDto> getSeanceByMovie(long movieId) {
+        movieService.getMovieById(movieId); // Film var mı kontrol et
+        return seanceRepository.findByMovieId(movieId).stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<SeanceDto> getSeanceByHall(long hallId) {
+        hallService.getHallDto(hallId); // Salon var mı kontrol et
+        return seanceRepository.findByHallId(hallId).stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<SeanceDto> getSeanceByDate(LocalDate date) {
+        return seanceRepository.findByDate(date).stream()
+                .map(this::toDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<SeanceDto> findAvailableSeances(SeanceSearchDto searchCriteria) {
+        movieService.getMovieById(searchCriteria.movieId()); // Film var mı kontrol et
+        return seanceRepository.findByDateAndMovieIdAndFormat(
+                searchCriteria.date(), 
+                searchCriteria.movieId(), 
+                searchCriteria.format()
+            ).stream()
+            .map(this::toDto)
+            .collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean isHallAvailable(TimeSlotCheckDto timeSlot) {
+        hallService.getHallDto(timeSlot.hallId()); // Salon var mı kontrol et
+        return !seanceRepository.existsOverlappingSession(
+            timeSlot.hallId(), 
+            timeSlot.date(), 
+            timeSlot.startTime(), 
+            timeSlot.endTime()
+        );
+    }
+
+    // Helper metodlar
+    private Seance findSeanceById(Long seanceId) {
         return seanceRepository.findById(seanceId)
-                .orElseThrow(() -> new EntityNotFoundException("Session not found with id: " + seanceId));
+                .orElseThrow(() -> new EntityNotFoundException("Seans bulunamadı: " + seanceId));
     }
 
-    @Override
-    public List<Seance> getAllSeance() {
-        return seanceRepository.findAll();
+    private void updateSeanceFromDto(Seance seance, SeanceCreateDto dto, Movie movie, Hall hall) {
+        seance.setStartTime(dto.startTime());
+        seance.setBreakTime(dto.breakTime());
+        seance.setDate(dto.date());
+        seance.setDubLanguage(dto.dubLanguage());
+        seance.setHasSubtitle(dto.hasSubtitle());
+        seance.setSubLanguage(dto.subLanguage());
+        seance.setFormat(dto.format());
+        seance.setMovie(movie);
+        seance.setHall(hall);
+        
+        calculateEndTime(seance, movie);
     }
 
-    @Override
-    public List<Seance> getSeanceByMovie(long movieId) {
-        // Check if the movie exists
-        if (!movieRepository.existsById(movieId)) {
-            throw new EntityNotFoundException("Movie not found with id: " + movieId);
+    private void validateHallAvailability(Seance seance, SeanceCreateDto dto) {
+        boolean needsAvailabilityCheck = seance.getHall().getId() != dto.hallId() ||
+                !seance.getDate().equals(dto.date()) ||
+                !seance.getStartTime().equals(dto.startTime());
+        
+        if (needsAvailabilityCheck) {
+            TimeSlotCheckDto timeSlot = new TimeSlotCheckDto(
+                seance.getHall().getId(),
+                seance.getDate(),
+                seance.getStartTime(),
+                seance.getEndTime()
+            );
+            
+            if (!isHallAvailable(timeSlot)) {
+                throw new IllegalStateException("Salon " + seance.getHall().getId() + 
+                        " bu zaman dilimi için müsait değil");
+            }
         }
-
-        return seanceRepository.findByMovieId(movieId);
-    }
-
-    @Override
-    public List<Seance> getSeanceByHall(long hallId) {
-        // Check if the hall exists
-        if (!hallRepository.existsById(hallId)) {
-            throw new EntityNotFoundException("Hall not found with id: " + hallId);
-        }
-
-        return seanceRepository.findByHallId(hallId);
-    }
-
-    @Override
-    public List<Seance> getSeanceByDate(LocalDate date) {
-        return seanceRepository.findByDate(date);
-    }
-
-    @Override
-    public List<Seance> getAvailableSeanceByDateAndMovieAndFormat(LocalDate date, long movieId, MovieFormat format) {
-        // Check if the movie exists
-        if (!movieRepository.existsById(movieId)) {
-            throw new EntityNotFoundException("Movie not found with id: " + movieId);
-        }
-
-        return seanceRepository.findByDateAndMovieIdAndFormat(date, movieId, format);
-    }
-
-    @Override
-    public boolean isHallAvailableForTimeSlot(long hallId, LocalDate date, LocalTime startTime, LocalTime endTime) {
-        if (!hallRepository.existsById(hallId)) {
-            throw new EntityNotFoundException("Hall not found with id: " + hallId);
-        }
-
-        return !seanceRepository.existsOverlappingSession(hallId, date, startTime, endTime);
     }
 
     private void calculateEndTime(Seance seance, Movie movie) {
@@ -169,5 +188,23 @@ public class SeanceServiceImpl implements SeanceService {
                     seance.getBreakTime().getMinute();
             seance.setEndTime(seance.getStartTime().plusMinutes(totalMinutes));
         }
+    }
+
+    private SeanceDto toDto(Seance seance) {
+        if (seance == null) return null;
+
+        return SeanceDto.builder()
+                .id(seance.getId())
+                .startTime(seance.getStartTime())
+                .breakTime(seance.getBreakTime())
+                .endTime(seance.getEndTime())
+                .date(seance.getDate())
+                .dubLanguage(seance.getDubLanguage())
+                .hasSubtitle(seance.isHasSubtitle())
+                .subLanguage(seance.getSubLanguage())
+                .format(seance.getFormat())
+                .movie(movieService.getMovieById(seance.getMovie().getId()))
+                .hall(hallService.getHallDto(seance.getHall().getId()))
+                .build();
     }
 }

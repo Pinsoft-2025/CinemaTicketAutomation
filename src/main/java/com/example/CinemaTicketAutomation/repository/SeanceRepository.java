@@ -22,13 +22,6 @@ public interface SeanceRepository extends JpaRepository<Seance, Long> {
                                               @Param("movieId") long movieId,
                                               @Param("format") MovieFormat format);
 
-    @Query("SELECT COUNT(s) > 0 FROM Seance s WHERE s.hall.id = :hallId AND s.date = :date " +
-            "AND ((s.startTime <= :endTime AND s.endTime >= :startTime)) AND s.id != :excludeSeansId")
-    boolean existsOverlappingSessionExcludingId(@Param("hallId") long hallId,
-                                                @Param("date") LocalDate date,
-                                                @Param("startTime") LocalTime startTime,
-                                                @Param("endTime") LocalTime endTime,
-                                                @Param("excludeSeansId") long excludeSeansId);
 
     @Query("SELECT COUNT(s) > 0 FROM Seance s WHERE s.hall.id = :hallId AND s.date = :date " +
             "AND ((s.startTime <= :endTime AND s.endTime >= :startTime))")
