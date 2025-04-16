@@ -3,6 +3,7 @@ package com.example.CinemaTicketAutomation.controller;
 import com.example.CinemaTicketAutomation.dto.request.MovieCreateDto;
 import com.example.CinemaTicketAutomation.dto.response.MovieDto;
 import com.example.CinemaTicketAutomation.entity.enums.Country;
+import com.example.CinemaTicketAutomation.entity.enums.Genre;
 import com.example.CinemaTicketAutomation.service.MovieService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -27,7 +28,12 @@ public class MovieController {
     public ResponseEntity<MovieDto> createMovie(@RequestBody MovieCreateDto movieCreateDto) {
         return ResponseEntity.ok(movieService.createMovie(movieCreateDto));
     }
-    
+
+    @PostMapping("/update-info/{id}")
+    public ResponseEntity<MovieDto> updateMovie(@PathVariable Long id, @RequestBody MovieDto movieDto) {
+        return ResponseEntity.ok(movieService.updateMovie(id, movieDto));
+    }
+
     @DeleteMapping("/delete/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteMovie(@PathVariable Long id) {
@@ -51,7 +57,12 @@ public class MovieController {
     public ResponseEntity<List<MovieDto>> searchMovies(@RequestParam String keyword) {
         return ResponseEntity.ok(movieService.searchMoviesByTitle(keyword));
     }
-    
+
+    @GetMapping("/find-by-genre")
+    public ResponseEntity<List<MovieDto>> getMoviesByGenre(@RequestParam Genre genre) {
+        return ResponseEntity.ok(movieService.getMoviesByGenre(genre));
+    }
+
     @GetMapping("/find-by-director")
     public ResponseEntity<List<MovieDto>> getMoviesByDirector(@RequestParam String director) {
         return ResponseEntity.ok(movieService.getMoviesByDirector(director));
@@ -77,5 +88,10 @@ public class MovieController {
     @GetMapping("/find-by-date")
     public ResponseEntity<List<MovieDto>> getMoviesByReleaseDate(@RequestParam LocalDate date) {
         return ResponseEntity.ok(movieService.getMoviesByReleaseDate(date));
+    }
+
+    @GetMapping("/count")
+    long getMoviesCount() {
+        return movieService.getMovieCount();
     }
 } 
