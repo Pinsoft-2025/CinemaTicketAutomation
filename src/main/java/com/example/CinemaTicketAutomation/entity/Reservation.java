@@ -2,6 +2,7 @@ package com.example.CinemaTicketAutomation.entity;
 
 import com.example.CinemaTicketAutomation.entity.enums.PaymentMethod;
 import com.example.CinemaTicketAutomation.entity.enums.PaymentStatus;
+import com.example.CinemaTicketAutomation.entity.enums.ReservationStatus;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -35,11 +36,15 @@ public class Reservation {
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_method")
     private PaymentMethod paymentMethod;
+    
+    @Enumerated(EnumType.STRING)
+    @Column(name = "reservation_status")
+    private ReservationStatus status = ReservationStatus.ACTIVE;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    private AppUser appUser;
 
-    @OneToMany(mappedBy = "reservation")
+    @OneToMany(mappedBy = "reservation", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Ticket> tickets;
 }
