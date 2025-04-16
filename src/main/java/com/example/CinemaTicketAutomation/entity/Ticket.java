@@ -42,14 +42,5 @@ public class Ticket {
     @JoinColumn(name = "seans_seat_id", nullable = false)
     private SeanceSeat seanceSeat;
     
-    // İptal ile ilgili yeni alanlar
-    @Enumerated(EnumType.STRING)
-    @Column(name = "cancellation_status")
-    private CancellationStatus cancellationStatus = CancellationStatus.NONE;
 
-    @Column(name = "cancellation_reason")
-    private String cancellationReason;
-
-    @Column(name = "admin_comment")
-    private String adminComment;
 }
