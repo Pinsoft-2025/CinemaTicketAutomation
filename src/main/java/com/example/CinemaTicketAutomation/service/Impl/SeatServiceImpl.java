@@ -3,6 +3,7 @@ package com.example.CinemaTicketAutomation.service.Impl;
 import com.example.CinemaTicketAutomation.dto.response.SeatDto;
 import com.example.CinemaTicketAutomation.entity.Hall;
 import com.example.CinemaTicketAutomation.entity.Seat;
+import com.example.CinemaTicketAutomation.dto.SeatPosition;
 import com.example.CinemaTicketAutomation.repository.HallRepository;
 import com.example.CinemaTicketAutomation.repository.SeatRepository;
 import com.example.CinemaTicketAutomation.service.SeatService;
@@ -11,9 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.naming.NoPermissionException;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RequiredArgsConstructor
@@ -52,21 +51,15 @@ public class SeatServiceImpl implements SeatService {
         return createSeat(hall, nextPosition.row(), nextPosition.column());
     }
 
-    // Bir sonraki müsait koltuk pozisyonunu bulan yardımcı record
-    private record SeatPosition(String row, int column) {}
-
     // sonraki boş pozisyonu bulan yardımcı metod
     private SeatPosition findNextAvailablePosition(Hall hall, List<Seat> existingSeats) {
         String maxRow = hall.getMaxRow().toUpperCase();
         int maxCol = hall.getMaxCol();
-        
-        // Maksimum satır sayısını hesapla (örn: 'F' için 6)
+
         int maxRowCount = maxRow.charAt(0) - 'A' + 1;
-        
-        // Grid oluştur ve mevcut koltukları işaretle
+
         boolean[][] grid = createAndFillGrid(existingSeats, maxRowCount, maxCol);
 
-        // İlk boş pozisyonu bul
         for (int r = 0; r < maxRowCount; r++) {
             char rowChar = (char) ('A' + r);
             String rowStr = String.valueOf(rowChar);
@@ -100,13 +93,11 @@ public class SeatServiceImpl implements SeatService {
 
     // Yeni koltuk oluşturan yardımcı metod
     private Seat createSeat(Hall hall, String row, int column) {
-        // Önce bu konumda koltuk var mı kontrol et
         if (seatRepository.existsByHallIdAndRowAndColumn(hall.getId(), row, column)) {
             throw new IllegalStateException(
                 row + column + " konumunda zaten bir koltuk var (Salon: " + hall.getId() + ")");
         }
 
-        // Yeni koltuğu oluştur
         Seat newSeat = new Seat();
         newSeat.setHall(hall);
         newSeat.setRow(row);

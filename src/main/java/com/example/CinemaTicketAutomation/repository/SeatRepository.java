@@ -21,6 +21,7 @@ public interface SeatRepository extends JpaRepository<Seat, Long> {
     @Query("SELECT s FROM Seat s WHERE s.hall.id = :hallId ORDER BY s.row DESC, s.column DESC")
     Optional<Seat> findLastSeatInHall(@Param("hallId") long hallId); // LIMIT 1 otomatik eklenir Optional ile
 
+    // Bu metot kullanılmıyor, ama düzenli sıralama ihtiyacı olursa kullanılabilir
     List<Seat> findByHallIdOrderByRowAscColumnAsc(long hallId);
 
     /**
