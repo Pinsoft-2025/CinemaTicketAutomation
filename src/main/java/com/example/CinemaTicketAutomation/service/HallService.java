@@ -12,12 +12,11 @@ import java.util.List;
 public interface HallService {
 
     Hall createHall(Hall hall);
-    Hall updateHall(Hall hall);
+    Hall updateHall(long id, Hall hall);
     void deleteHall(long hallId);
     Hall getHall(long hallId);
     HallDto getHallDto(long hallId);
 
     List<Hall> getAllHalls();
-    List<HallDto> getAllHallDtos();
     List<Hall> getHallsWithMinimumCapacity(int minCapacity);//belli kapasiteden yüksek salonları
 }

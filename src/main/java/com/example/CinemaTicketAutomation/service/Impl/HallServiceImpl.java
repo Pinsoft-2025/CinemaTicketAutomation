@@ -33,8 +33,8 @@ public class HallServiceImpl implements HallService {
      */
     @Transactional
     @Override
-    public Hall updateHall(Hall hall) {
-        Hall oldHall = hallRepository.findById(hall.getId())
+    public Hall updateHall(long id, Hall hall) {
+        Hall oldHall = hallRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Hall not found"));
 
         // Update basic properties
@@ -104,13 +104,6 @@ public class HallServiceImpl implements HallService {
     public HallDto getHallDto(long hallId) {
         Hall hall = getHall(hallId);
         return toDto(hall);
-    }
-
-    @Override
-    public List<HallDto> getAllHallDtos() {
-        return getAllHalls().stream()
-                .map(this::toDto)
-                .collect(Collectors.toList());
     }
 
     private HallDto toDto(Hall hall) {
