@@ -1,4 +1,4 @@
-package com.example.CinemaTicketAutomation.security;
+package com.example.CinemaTicketAutomation.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
