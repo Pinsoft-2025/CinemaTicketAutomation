@@ -45,7 +45,7 @@ public class ReservationController {
         return ResponseEntity.ok(reservationService.updatePaymentStatus(reservationId, status));
     }
 
-//  //TODO Cancel ile birlikte gelecek
+//  Cancel ile birlikte gelecek
 //    @DeleteMapping("/{id}")
 //    public ResponseEntity<Void> deleteReservation(@PathVariable long id) {
 //        reservationService.deleteReservation(id);
