@@ -2,7 +2,10 @@ package com.example.CinemaTicketAutomation.service;
 
 import com.example.CinemaTicketAutomation.dto.request.TicketCreateDto;
 import com.example.CinemaTicketAutomation.dto.response.TicketDto;
+import com.example.CinemaTicketAutomation.entity.enums.CancellationStatus;
+import com.example.CinemaTicketAutomation.entity.enums.TicketType;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 public interface TicketService {
@@ -11,4 +14,15 @@ public interface TicketService {
     List<TicketDto> getTicketsByReservationId(long reservationId);
     TicketDto getTicketById(long ticketId);
     List<TicketDto> getTicketsByUserId(long userId);
+    
+    // Admin metodları
+    List<TicketDto> getAllTickets();
+    TicketDto getTicketBySeanceSeatId(Long seanceSeatId);
+    List<TicketDto> getTicketsByIssuedAtBetween(LocalDateTime start, LocalDateTime end);
+    List<TicketDto> getTicketsByType(TicketType type);
+    List<TicketDto> getTicketsByCancellationStatus(CancellationStatus status);
+    
+    // User metodları
+    TicketDto getTicketByBarcode(String barcode);
+    List<TicketDto> getTicketsByBarcodeAndCancellationStatus(String barcode, CancellationStatus status);
 }
