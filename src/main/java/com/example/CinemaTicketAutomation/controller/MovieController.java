@@ -23,18 +23,19 @@ public class MovieController {
 
     // Admin yetkileri gerektiren metodlar
     
-    @PostMapping("/create")
+    @PostMapping("/admin/create")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<MovieDto> createMovie(@RequestBody MovieCreateDto movieCreateDto) {
         return ResponseEntity.ok(movieService.createMovie(movieCreateDto));
     }
 
-    @PostMapping("/update-info/{id}")
+    @PostMapping("/admin/update-info/{id}")
+    @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<MovieDto> updateMovie(@PathVariable Long id, @RequestBody MovieDto movieDto) {
         return ResponseEntity.ok(movieService.updateMovie(id, movieDto));
     }
 
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/admin/delete/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteMovie(@PathVariable Long id) {
         movieService.deleteMovie(id);
