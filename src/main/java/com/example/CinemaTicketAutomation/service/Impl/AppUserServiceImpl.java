@@ -6,11 +6,10 @@ import com.example.CinemaTicketAutomation.dto.request.UserUpdateDto;
 import com.example.CinemaTicketAutomation.entity.AppUser;
 import com.example.CinemaTicketAutomation.entity.enums.Role;
 import com.example.CinemaTicketAutomation.repository.AppUserRepository;
-import com.example.CinemaTicketAutomation.security.PasswordEncoderConfig;
-import com.example.CinemaTicketAutomation.service.UserService;
+import com.example.CinemaTicketAutomation.config.PasswordEncoderConfig;
+import com.example.CinemaTicketAutomation.service.AppUserService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,7 +19,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
-public class UserServiceImpl implements UserService {
+public class AppUserServiceImpl implements AppUserService {
 
     private final AppUserRepository appUserRepository;
     private final PasswordEncoderConfig passwordEncoder;

@@ -1,6 +1,6 @@
 package com.example.CinemaTicketAutomation.security;
 
-import com.example.CinemaTicketAutomation.service.UserService;
+import com.example.CinemaTicketAutomation.service.AppUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -11,11 +11,11 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class UserDetailsServiceImpl implements UserDetailsService {
 
-    private final UserService userService;
+    private final AppUserService appUserService;
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userService.findByUsername(username)
+        return appUserService.findByUsername(username)
                 .map(UserDetailsImpl::new) // Optional<User> → Optional<UserDetailsImpl>
                 .orElseThrow(() -> new UsernameNotFoundException("Couldn't find user with the username: " + username));
     }

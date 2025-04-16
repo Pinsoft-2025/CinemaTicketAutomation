@@ -9,7 +9,7 @@ import com.example.CinemaTicketAutomation.entity.enums.PaymentStatus;
 import com.example.CinemaTicketAutomation.repository.ReservationRepository;
 import com.example.CinemaTicketAutomation.repository.AppUserRepository;
 import com.example.CinemaTicketAutomation.service.ReservationService;
-import com.example.CinemaTicketAutomation.service.UserService;
+import com.example.CinemaTicketAutomation.service.AppUserService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -27,7 +27,7 @@ public class ReservationServiceImpl implements ReservationService {
 
     private final ReservationRepository reservationRepository;
     private final AppUserRepository appUserRepository;
-    private final UserService userService;
+    private final AppUserService appUserService;
 
     @Override
     public ReservationDto createInitialReservation(ReservationCreateDto createDto) {
@@ -125,7 +125,7 @@ public class ReservationServiceImpl implements ReservationService {
                 .totalPrice(reservation.getTotalPrice())
                 .paymentStatus(reservation.getPaymentStatus())
                 .paymentMethod(reservation.getPaymentMethod())
-                .user(userService.getUserById(reservation.getAppUser().getId()))
+                .user(appUserService.getUserById(reservation.getAppUser().getId()))
                 .tickets(new ArrayList<>())
                 .build();
     }

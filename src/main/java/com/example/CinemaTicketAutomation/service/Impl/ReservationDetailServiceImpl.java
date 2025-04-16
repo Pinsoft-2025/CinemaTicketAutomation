@@ -5,7 +5,7 @@ import com.example.CinemaTicketAutomation.entity.Reservation;
 import com.example.CinemaTicketAutomation.service.ReservationDetailService;
 import com.example.CinemaTicketAutomation.service.ReservationService;
 import com.example.CinemaTicketAutomation.service.TicketService;
-import com.example.CinemaTicketAutomation.service.UserService;
+import com.example.CinemaTicketAutomation.service.AppUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,7 +18,7 @@ public class ReservationDetailServiceImpl implements ReservationDetailService {
 
     private final ReservationService reservationService;
     private final TicketService ticketService;
-    private final UserService userService;
+    private final AppUserService appUserService;
     
     @Override
     public ReservationWithTicketsDto getReservationWithTickets(long reservationId) {
@@ -31,7 +31,7 @@ public class ReservationDetailServiceImpl implements ReservationDetailService {
                 .paymentStatus(reservation.getPaymentStatus())
                 .paymentMethod(reservation.getPaymentMethod())
                 .status(reservation.getStatus())
-                .user(userService.getUserById(reservation.getAppUser().getId()))
+                .user(appUserService.getUserById(reservation.getAppUser().getId()))
                 .tickets(ticketService.getTicketsByReservationId(reservation.getId()))
                 .build();
     }
@@ -39,7 +39,7 @@ public class ReservationDetailServiceImpl implements ReservationDetailService {
     @Override
     public List<ReservationWithTicketsDto> getReservationsWithTicketsByUserId(long userId) {
         // Kullanıcının varlığını kontrol et
-        userService.getUserById(userId);
+        appUserService.getUserById(userId);
         
         // Kullanıcının tüm rezervasyonlarını getir
         List<Reservation> reservations = reservationService.getReservationsByUserId(userId)
@@ -56,7 +56,7 @@ public class ReservationDetailServiceImpl implements ReservationDetailService {
                         .paymentStatus(reservation.getPaymentStatus())
                         .paymentMethod(reservation.getPaymentMethod())
                         .status(reservation.getStatus())
-                        .user(userService.getUserById(reservation.getAppUser().getId()))
+                        .user(appUserService.getUserById(reservation.getAppUser().getId()))
                         .tickets(ticketService.getTicketsByReservationId(reservation.getId()))
                         .build())
                 .collect(Collectors.toList());

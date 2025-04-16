@@ -26,7 +26,7 @@ import java.util.stream.Collectors;
 public class TicketServiceImpl implements TicketService {
 
     private final TicketRepository ticketRepository;
-    private final UserService userService;
+    private final AppUserService appUserService;
     private final ReservationService reservationService;
     private final SeanceSeatService seanceSeatService;
 
@@ -39,7 +39,7 @@ public class TicketServiceImpl implements TicketService {
         }
 
         // Get user
-        AppUser appUser = userService.findUserById(ticketCreateDto.userId());
+        AppUser appUser = appUserService.findUserById(ticketCreateDto.userId());
 
         // Create reservation
         Reservation reservation = reservationService.createReservation(appUser, ticketCreateDto.paymentMethod());
@@ -100,7 +100,7 @@ public class TicketServiceImpl implements TicketService {
     @Override
     public List<TicketDto> getTicketsByUserId(long userId) {
         // Önce kullanıcının varlığını kontrol et
-        userService.findUserById(userId);
+        appUserService.findUserById(userId);
 
         List<Ticket> tickets = ticketRepository.findByReservation_AppUser_Id(userId);
         return tickets.stream().map(this::toDto).collect(Collectors.toList());
