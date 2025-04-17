@@ -1,6 +1,7 @@
 package com.example.CinemaTicketAutomation.entity;
 
 import com.example.CinemaTicketAutomation.entity.enums.CancellationStatus;
+import com.example.CinemaTicketAutomation.entity.enums.TicketStatus;
 import com.example.CinemaTicketAutomation.entity.enums.TicketType;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -25,6 +26,10 @@ public class Ticket {
     @Column(name = "type", nullable = false)
     private TicketType type = TicketType.FULL;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "status", nullable = false)
+    private TicketStatus status = TicketStatus.ACTIVE;
+
     @Column(name = "price", nullable = false, precision = 10, scale = 2)
     private BigDecimal price;
 
@@ -42,5 +47,4 @@ public class Ticket {
     @JoinColumn(name = "seans_seat_id", nullable = false)
     private SeanceSeat seanceSeat;
     
-
 }

@@ -22,4 +22,7 @@ public interface TicketService {
 
     // User metodları
     TicketDto getTicketByBarcode(String barcode);
+    
+    // İptal işlemleri
+    void cancelTicket(Long ticketId);
 }

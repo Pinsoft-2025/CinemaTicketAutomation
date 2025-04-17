@@ -5,6 +5,7 @@ import com.example.CinemaTicketAutomation.dto.response.SeanceSeatDto;
 import com.example.CinemaTicketAutomation.dto.response.TicketDto;
 import com.example.CinemaTicketAutomation.entity.*;
 import com.example.CinemaTicketAutomation.entity.enums.SeatStatus;
+import com.example.CinemaTicketAutomation.entity.enums.TicketStatus;
 import com.example.CinemaTicketAutomation.entity.enums.TicketType;
 import com.example.CinemaTicketAutomation.repository.TicketRepository;
 import com.example.CinemaTicketAutomation.service.*;
@@ -19,6 +20,7 @@ import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,6 +31,7 @@ public class TicketServiceImpl implements TicketService {
     private final AppUserService appUserService;
     private final ReservationService reservationService;
     private final SeanceSeatService seanceSeatService;
+    private final EmailService emailService;
 
     @Transactional
     @Override
@@ -78,7 +81,31 @@ public class TicketServiceImpl implements TicketService {
         reservationService.updateReservationPrice(reservation.getId(), totalPrice);
 
         // Convert to DTOs and return
-        return tickets.stream().map(this::toDto).collect(Collectors.toList());
+        List<TicketDto> ticketDtos = tickets.stream().map(this::toDto).collect(Collectors.toList());
+
+        // Rezervasyon onay e-postası gönder
+        String reservationDetails = createReservationDetails(ticketDtos, reservation);
+        emailService.sendReservationConfirmation(appUser.getMail(), reservationDetails);
+
+        return ticketDtos;
+    }
+
+    private String createReservationDetails(List<TicketDto> tickets, Reservation reservation) {
+        StringBuilder details = new StringBuilder();
+        details.append("Rezervasyon No: ").append(reservation.getId()).append("\n");
+        details.append("Toplam Tutar: ").append(reservation.getTotalPrice()).append(" TL\n\n");
+        details.append("Bilet Detayları:\n");
+        
+        tickets.forEach(ticket -> {
+            details.append("Film: ").append(ticket.movieTitle()).append("\n");
+            details.append("Salon: ").append(ticket.hallNo()).append("\n");
+            details.append("Koltuk: ").append(ticket.seatNo()).append("\n");
+            details.append("Seans: ").append(ticket.seanceDateTime()).append("\n");
+            details.append("Bilet Tipi: ").append(ticket.type()).append("\n");
+            details.append("Fiyat: ").append(ticket.price()).append(" TL\n\n");
+        });
+        
+        return details.toString();
     }
 
     @Override
@@ -133,12 +160,29 @@ public class TicketServiceImpl implements TicketService {
                 .collect(Collectors.toList());
     }
 
-
-
     @Override
     public TicketDto getTicketByBarcode(String barcode) {
         Ticket ticket = ticketRepository.findByBarcode(barcode);
         return toDto(ticket);
+    }
+
+    @Override
+    @Transactional
+    public void cancelTicket(Long ticketId) {
+        Ticket ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new EntityNotFoundException("Bilet bulunamadı: " + ticketId));
+
+        ticket.setStatus(TicketStatus.CANCELLED);
+
+        SeanceSeat seanceSeat = ticket.getSeanceSeat();
+        if (seanceSeat != null) {
+            seanceSeatService.updateSeatStatus(seanceSeat, SeatStatus.FREE);
+        }
+
+        ticketRepository.save(ticket);
+        
+        // İptal edilen bilet için log kaydı tut
+        // logService.logTicketCancellation(ticket, "Admin onayı ile iptal edildi");
     }
 
     // Entity <-> DTO dönüşüm metodu
