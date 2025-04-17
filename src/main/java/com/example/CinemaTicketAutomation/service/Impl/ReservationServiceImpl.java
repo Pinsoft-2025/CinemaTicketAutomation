@@ -6,6 +6,7 @@ import com.example.CinemaTicketAutomation.entity.Reservation;
 import com.example.CinemaTicketAutomation.entity.AppUser;
 import com.example.CinemaTicketAutomation.entity.enums.PaymentMethod;
 import com.example.CinemaTicketAutomation.entity.enums.PaymentStatus;
+import com.example.CinemaTicketAutomation.entity.enums.ReservationStatus;
 import com.example.CinemaTicketAutomation.repository.ReservationRepository;
 import com.example.CinemaTicketAutomation.repository.AppUserRepository;
 import com.example.CinemaTicketAutomation.service.ReservationService;
@@ -113,6 +114,16 @@ public class ReservationServiceImpl implements ReservationService {
     public Reservation getReservationEntityById(long reservationId) {
         return reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new EntityNotFoundException("Rezervasyon bulunamadı: " + reservationId));
+    }
+
+    @Override
+    @Transactional
+    public void updateReservationStatus(Long reservationId, ReservationStatus status) {
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new EntityNotFoundException("Rezervasyon bulunamadı: " + reservationId));
+        
+        reservation.setStatus(status);
+        reservationRepository.save(reservation);
     }
 
     // Entity -> DTO dönüşüm metodu

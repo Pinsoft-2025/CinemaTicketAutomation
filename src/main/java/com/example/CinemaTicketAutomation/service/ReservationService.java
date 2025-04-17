@@ -6,6 +6,7 @@ import com.example.CinemaTicketAutomation.entity.AppUser;
 import com.example.CinemaTicketAutomation.entity.Reservation;
 import com.example.CinemaTicketAutomation.entity.enums.PaymentMethod;
 import com.example.CinemaTicketAutomation.entity.enums.PaymentStatus;
+import com.example.CinemaTicketAutomation.entity.enums.ReservationStatus;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -20,6 +21,7 @@ public interface ReservationService {
 
     Reservation createReservation(AppUser user, PaymentMethod paymentMethod);
     void updateReservationPrice(long reservationId, BigDecimal totalPrice);
+    void updateReservationStatus(Long reservationId, ReservationStatus status);
 
     Reservation getReservationEntityById(long reservationId);
 }
