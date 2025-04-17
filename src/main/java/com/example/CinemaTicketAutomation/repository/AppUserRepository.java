@@ -13,6 +13,7 @@ public interface AppUserRepository extends JpaRepository<AppUser, Long> {
     boolean existsByMail(String email);
     boolean existsByUsername(String username);
     Optional<AppUser> findByUsername(String username);
+    Optional<AppUser> findByMail(String email);
     List<AppUser> findByRole(Role role);
     List<AppUser> findByUsernameContainingIgnoreCase(String username);
     List<AppUser> findByMailContainingIgnoreCase(String email);
