@@ -44,6 +44,7 @@ public class SecurityConfig {
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(SWAGGER_WHITELIST).permitAll()
                 .requestMatchers("/api/auth/**").permitAll()
+                .requestMatchers("/**").permitAll() //-> !!!!!!!!!!!!!!!!!!!!! DISBLE SECURTIY !!!!!!!!!!!!!!!!!!!!
                 .requestMatchers("/api/admin/**").hasRole("ADMIN")
                 .anyRequest().authenticated()
             )

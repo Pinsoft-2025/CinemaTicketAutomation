@@ -1,5 +1,6 @@
 package com.example.CinemaTicketAutomation.controller;
 
+import com.example.CinemaTicketAutomation.dto.request.UserCreateDto;
 import com.example.CinemaTicketAutomation.dto.request.UserUpdateDto;
 import com.example.CinemaTicketAutomation.dto.response.UserDto;
 import com.example.CinemaTicketAutomation.entity.AppUser;
@@ -25,7 +26,13 @@ import java.util.List;
 public class AppUserController {
 
     private final AppUserService appUserService;
-    
+
+    @PostMapping("/create")
+    public ResponseEntity<UserDto> createUser(@RequestBody UserCreateDto request) {
+        UserDto createdUser = appUserService.createUser(request);
+        return ResponseEntity.ok(createdUser);
+    }
+
     // Kullanıcı kendi profilini görüntüleyebilir
     @GetMapping("/find-own/{id}")
     @PreAuthorize("hasRole('USER') and @userSecurity.isCurrentUser(#id)")
