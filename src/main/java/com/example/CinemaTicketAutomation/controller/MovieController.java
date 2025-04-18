@@ -14,6 +14,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -31,7 +32,7 @@ public class MovieController {
 
     // Admin yetkileri gerektiren metodlar
     
-    @PostMapping("/admin/create")
+    @PostMapping(path = "/admin/create", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Film ekle", description = "Yeni bir film ekler (Sadece Admin)")
     @ApiResponses(value = {
@@ -41,7 +42,7 @@ public class MovieController {
     })
     public ResponseEntity<MovieDto> createMovie(
             @Parameter(description = "Film bilgileri", required = true)
-            @RequestBody MovieCreateDto movieCreateDto) {
+            @ModelAttribute MovieCreateDto movieCreateDto) {
         return ResponseEntity.ok(movieService.createMovie(movieCreateDto));
     }
 

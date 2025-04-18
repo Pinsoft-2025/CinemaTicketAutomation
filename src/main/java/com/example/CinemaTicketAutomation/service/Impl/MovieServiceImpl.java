@@ -28,25 +28,13 @@ public class MovieServiceImpl implements MovieService {
     @Override
     @Transactional
     public MovieDto createMovie(MovieCreateDto movieCreateDto) {
-        // Posterın MultipartFile olarak gönderildiği durumu işle
-        String posterBase64 = movieCreateDto.posterBase64();
-        if (movieCreateDto.posterFile() != null && !movieCreateDto.posterFile().isEmpty()) {
-            try {
-                posterBase64 = Base64.getEncoder().encodeToString(movieCreateDto.posterFile().getBytes());
-            } catch (IOException e) {
-                throw new RuntimeException("Poster resmi kodlanırken hata oluştu", e);
-            }
+        try {
+            Movie movie = createDtoToEntity(movieCreateDto);
+            Movie savedMovie = movieRepository.save(movie);
+            return toDto(savedMovie);
+        } catch (IOException e) {
+            throw new RuntimeException("Poster dönüştürme hatası: " + e.getMessage());
         }
-        
-        // MovieCreateDto'dan Movie entity'sine dönüşümü yap
-        Movie movie = createDtoToEntity(movieCreateDto);
-        // Eğer posterFile gönderildiyse ve Base64'e dönüştürüldüyse, onu kullan
-        if (posterBase64 != null) {
-            movie.setPoster(posterBase64);
-        }
-        
-        Movie savedMovie = movieRepository.save(movie);
-        return toDto(savedMovie);
     }
 
     @Override
@@ -212,23 +200,28 @@ public class MovieServiceImpl implements MovieService {
         return movie;
     }
     
-    private Movie createDtoToEntity(MovieCreateDto dto) {
-        if (dto == null) {
-            return null;
+    private Movie createDtoToEntity(MovieCreateDto dto) throws IOException {
+        String posterBase64 = null;
+        if (dto.getPoster() != null && !dto.getPoster().isEmpty()) {
+            try {
+                byte[] fileContent = dto.getPoster().getBytes();
+                posterBase64 = Base64.getEncoder().encodeToString(fileContent);
+            } catch (IOException e) {
+                throw new IOException("Poster dosyası işlenirken hata oluştu: " + e.getMessage());
+            }
         }
-        
-        Movie movie = new Movie();
-        movie.setTitle(dto.title());
-        movie.setDescription(dto.description());
-        movie.setPoster(dto.posterBase64());
-        movie.setTrailerURI(dto.trailerURI());
-        movie.setDurationMin(dto.durationMin());
-        movie.setGenres(dto.genres());
-        movie.setDirector(dto.director());
-        movie.setCountry(dto.country());
-        movie.setReleaseDate(dto.releaseDate());
-        movie.setWarnings(dto.warnings());
-        
-        return movie;
+
+        return Movie.builder()
+                .title(dto.getTitle())
+                .description(dto.getDescription())
+                .director(dto.getDirector())
+                .durationMin(dto.getDurationMin())
+                .releaseDate(dto.getReleaseDate())
+                .poster(posterBase64)
+                .trailerURI(dto.getTrailerURI())
+                .genres(dto.getGenres())
+                .country(dto.getCountry())
+                .warnings(dto.getWarnings())
+                .build();
     }
 }

@@ -4,18 +4,17 @@ import com.example.CinemaTicketAutomation.entity.enums.Country;
 import com.example.CinemaTicketAutomation.entity.enums.Genre;
 import com.example.CinemaTicketAutomation.entity.enums.Warning;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.util.List;
 
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
-@Table(name = "movies")
 @Entity
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Table(name = "movies")
 public class Movie {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,7 +27,7 @@ public class Movie {
     @Column(name = "description", length = 500)
     private String description;
 
-    @Column(name = "poster")
+    @Column(name = "poster", length = 100000)
     private String poster;
 
     @Column(name = "trailer_uri")
