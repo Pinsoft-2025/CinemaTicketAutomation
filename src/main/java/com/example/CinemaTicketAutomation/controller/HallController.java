@@ -1,5 +1,6 @@
 package com.example.CinemaTicketAutomation.controller;
 
+import com.example.CinemaTicketAutomation.dto.request.HallCreateRequest;
 import com.example.CinemaTicketAutomation.dto.response.HallDto;
 import com.example.CinemaTicketAutomation.entity.Hall;
 import com.example.CinemaTicketAutomation.service.HallService;
@@ -9,6 +10,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -24,7 +26,6 @@ public class HallController {
 
     private final HallService hallService;
 
-    // Admin salon ekleyebilir
     @PostMapping("/admin/create")
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Salon ekle", description = "Yeni bir salon ekler (Sadece Admin)")
@@ -33,10 +34,10 @@ public class HallController {
         @ApiResponse(responseCode = "400", description = "Geçersiz salon bilgileri", content = @Content),
         @ApiResponse(responseCode = "403", description = "Yetkisiz erişim", content = @Content)
     })
-    public ResponseEntity<Hall> createHall(
+    public ResponseEntity<HallDto> createHall(
             @Parameter(description = "Salon bilgileri", required = true)
-            @RequestBody Hall hall) {
-        return ResponseEntity.ok(hallService.createHall(hall));
+            @Valid @RequestBody HallCreateRequest request) {
+        return ResponseEntity.ok(hallService.createHall(request));
     }
 
     // Admin salon güncelleyebilir

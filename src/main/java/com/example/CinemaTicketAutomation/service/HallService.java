@@ -1,5 +1,6 @@
 package com.example.CinemaTicketAutomation.service;
 
+import com.example.CinemaTicketAutomation.dto.request.HallCreateRequest;
 import com.example.CinemaTicketAutomation.dto.response.HallDto;
 import com.example.CinemaTicketAutomation.entity.Hall;
 import com.example.CinemaTicketAutomation.entity.Movie;
@@ -11,7 +12,7 @@ import java.util.List;
 @Service
 public interface HallService {
 
-    Hall createHall(Hall hall);
+    HallDto createHall(HallCreateRequest request);
     Hall updateHall(long id, Hall hall);
     void deleteHall(long hallId);
     Hall getHall(long hallId);

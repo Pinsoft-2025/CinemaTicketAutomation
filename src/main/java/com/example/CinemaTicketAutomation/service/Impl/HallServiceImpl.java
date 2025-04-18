@@ -1,5 +1,6 @@
 package com.example.CinemaTicketAutomation.service.Impl;
 
+import com.example.CinemaTicketAutomation.dto.request.HallCreateRequest;
 import com.example.CinemaTicketAutomation.dto.response.HallDto;
 import com.example.CinemaTicketAutomation.entity.Hall;
 import com.example.CinemaTicketAutomation.entity.Seat;
@@ -21,8 +22,14 @@ public class HallServiceImpl implements HallService {
 
     //no sensitive info, no need for dto
     @Override
-    public Hall createHall(Hall hall) {
-        return hallRepository.save(hall);
+    public HallDto createHall(HallCreateRequest request) {
+        Hall hall = new Hall();
+        hall.setHallNo(request.getHallNo());
+        hall.setMaxRow(request.getMaxRow().toUpperCase());
+        hall.setMaxCol(request.getMaxCol());
+        
+        Hall savedHall = hallRepository.save(hall);
+        return toDto(savedHall);
     }
 
     /*
